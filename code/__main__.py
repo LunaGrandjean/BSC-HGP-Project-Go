@@ -1,7 +1,9 @@
+from go import GoGame
 from PyQt6.QtWidgets import QApplication
-from go import Go
 import sys
 
-app = QApplication([])
-myGo = Go()
-sys.exit(app.exec())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = GoGame()
+    window.show()
+    sys.exit(app.exec())
