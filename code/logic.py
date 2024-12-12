@@ -18,6 +18,19 @@ class GameLogic:
         self.previous_states = []  # For KO rule prevention
         self.captured_stones = {"black": 0, "white": 0}
 
+    def undo_stone(self, row, col):
+        """
+        Undo the last stone placed on the board.
+        """
+        if self.board_state[row][col] != 0:
+            # Reset the position to empty
+            self.board_state[row][col] = 0
+            # Switch the turn back to the previous player
+            self.current_player *= -1
+            # Remove the last state from the previous_states stack if applicable
+            if self.previous_states:
+                self.previous_states.pop()
+
     def place_stone(self, row, col):
         """
         Place a stone on the board. Returns True if the move is valid, False otherwise.
@@ -240,3 +253,6 @@ class GameLogic:
             "black": self.black_score + self.captured_stones["black"] + territories["black"],
             "white": self.white_score + self.captured_stones["white"] + territories["white"]
         }
+    
+    
+  
