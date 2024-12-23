@@ -7,8 +7,11 @@ It supports storing stone placements in a 2D grid structure.
 from PyQt6.QtWidgets import QFrame
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPen, QRadialGradient
+from PyQt6.QtCore import pyqtSignal
 
 class Board(QFrame):
+    stonePlaced = pyqtSignal(int, int)  # Signal emitted with row, col of the placed stone
+
     def __init__(self, size):
         """
         Initialize the board with a given size (e.g., 7 for a 7x7 board).
@@ -155,7 +158,7 @@ class Board(QFrame):
 
     def draw_board(self, painter):
         """
-        Draw the colored background and the grid lines.
+        Draw the board background and grid lines to ensure proper alignment.
         """
         # Draw background (golden color)
         painter.setBrush(QColor(181, 137, 0))
@@ -165,13 +168,13 @@ class Board(QFrame):
         pen = QPen(Qt.GlobalColor.black, 2)
         painter.setPen(pen)
 
-        for i in range(self.size + 1):
-            # Vertical lines
-            x = i * self.cell_size
-            painter.drawLine(x, 0, x, self.size * self.cell_size)
-            # Horizontal lines
-            y = i * self.cell_size
-            painter.drawLine(0, y, self.size * self.cell_size, y)
+        for i in range(self.size):
+            # Draw vertical lines
+            x = i * self.cell_size + self.cell_size // 2
+            painter.drawLine(x, self.cell_size // 2, x, self.size * self.cell_size - self.cell_size // 2)
+            # Draw horizontal lines
+            y = i * self.cell_size + self.cell_size // 2
+            painter.drawLine(self.cell_size // 2, y, self.size * self.cell_size - self.cell_size // 2, y)
 
     def draw_pieces(self, painter):
         """
@@ -227,3 +230,23 @@ class Board(QFrame):
         Minimum size for the board widget.
         """
         return QSize(self.size * self.cell_size, self.size * self.cell_size)
+
+    def mousePressEvent(self, event):
+        """
+        Handle mouse click events to place a stone.
+        """
+        # Get the position of the mouse click
+        x = event.pos().x()
+        y = event.pos().y()
+
+        # Calculate the grid intersection (row, col) based on mouse position
+        col = round((x - self.cell_size // 2) / self.cell_size)
+        row = round((y - self.cell_size // 2) / self.cell_size)
+
+        # Ensure the click is within valid grid boundaries
+        if 0 <= row < self.size and 0 <= col < self.size:
+            # Emit a signal to notify the main game logic (GoGame)
+            self.stonePlaced.emit(row, col)
+        else:
+            # Ignore clicks outside the grid
+            print("Click outside grid boundaries!")
