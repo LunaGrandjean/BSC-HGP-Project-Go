@@ -17,6 +17,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QFont
 from logic import GameLogic
+from board import Board
+
 
 class GoGame(QMainWindow):
     def __init__(self):
@@ -216,16 +218,14 @@ class GoGame(QMainWindow):
         Create a 7x7 board using QPushButton for each intersection.
         Each button calls place_stone(row, col) when clicked.
         """
-        for row in range(self.board_size):
-            for col in range(self.board_size):
-                button = QPushButton()
-                button.setStyleSheet("background-color: #B58500; border: 1px solid black;")
-                button.setFixedSize(70, 70)  # Slightly larger to show the stone
-                # Use a lambda to pass row, col to place_stone
-                button.clicked.connect(lambda _, r=row, c=col: self.place_stone(r, c))
-                self.grid_layout.addWidget(button, row, col)
-                self.buttons[(row, col)] = button
+        # Create a Board instance (7x7)
+        self.board_widget = Board(self.board_size)
+        self.grid_layout.addWidget(self.board_widget, 0, 0, self.board_size, self.board_size)
 
+        # Connect the stonePlaced signal to the place_stone method
+        self.board_widget.stonePlaced.connect(self.place_stone)
+
+    
     def place_stone(self, row, col):
         """
         Attempt to place a stone at the given row/column.
@@ -412,21 +412,15 @@ class GoGame(QMainWindow):
 
     def update_board_ui(self):
         """
-        Update each QPushButton to display the current state (stone or empty).
-        The board background and lines remain as in board.py.
+        Update the `Board` widget to reflect the current state of the game.
         """
-        state = self.logic.get_board_state()
-        for (r, c), value in state.items():
-            button = self.buttons[(r, c)]
-            if value == 1:   # Black stone
-                button.setText("●")
-                button.setStyleSheet("color: black; font-size: 40px; background-color: #B58500; border: none;")
-            elif value == -1:  # White stone
-                button.setText("●")
-                button.setStyleSheet("color: white; font-size: 40px; background-color: #B58500; border: none;")
-            else:  # Empty
-                button.setText("")
-                button.setStyleSheet("background-color: #B58500; border: 1px solid black;")
+        board_state = self.logic.get_board_state()
+        for (row, col), value in board_state.items():
+            # Update the board grid directly (no QPushButton)
+            self.board_widget.grid[row][col] = value
+
+        # Trigger a repaint of the board
+        self.board_widget.update()
 
     def update_labels(self):
         """
