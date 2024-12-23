@@ -1,7 +1,14 @@
+"""
+File: score_board.py
+Implements a simple ScoreBoard class to track and calculate scores
+(including territory, captures, etc.). This can be used or
+you can rely on logic.py's internal approach. 
+"""
+
 class ScoreBoard:
     def __init__(self):
         """
-        Initialize the scoreboard with scores for both players.
+        Initialize the scoreboard with basic zeroed-out fields.
         """
         self.black_score = 0
         self.white_score = 0
@@ -11,9 +18,7 @@ class ScoreBoard:
 
     def add_score(self, player, points):
         """
-        Add points to the score of the specified player.
-        :param player: 1 for Black, -1 for White
-        :param points: Number of points to add
+        Add points to a player (1=Black, -1=White).
         """
         if player == 1:
             self.black_score += points
@@ -22,8 +27,8 @@ class ScoreBoard:
 
     def add_captured_stone(self, player):
         """
-        Increment the count of stones captured by the opponent.
-        :param player: 1 for Black, -1 for White
+        Increment the count of stones captured by the *opponent*.
+        For example, if 'player'=1 (Black), then white captured a black stone => captured_black++ 
         """
         if player == 1:
             self.captured_white += 1
@@ -32,9 +37,7 @@ class ScoreBoard:
 
     def calculate_final_score(self, komi=6.5):
         """
-        Calculate the final score including captured stones and territories.
-        :param komi: Bonus points for White to balance first move advantage (default is 6.5)
-        :return: Dictionary with final scores for Black and White
+        Calculate the final score with captured stones + territory + komi for White.
         """
         final_black_score = self.black_score + self.captured_black + self.territories["black"]
         final_white_score = self.white_score + self.captured_white + self.territories["white"] + komi
@@ -45,9 +48,7 @@ class ScoreBoard:
 
     def update_territory(self, player, points):
         """
-        Update the territory count for a player.
-        :param player: 1 for Black, -1 for White
-        :param points: Number of territory points to add
+        Update the territory count for a given player (1=Black, -1=White).
         """
         if player == 1:
             self.territories["black"] += points
@@ -56,7 +57,7 @@ class ScoreBoard:
 
     def reset_scores(self):
         """
-        Reset the scoreboard to the initial state.
+        Reset everything to zero.
         """
         self.black_score = 0
         self.white_score = 0
@@ -66,8 +67,7 @@ class ScoreBoard:
 
     def get_scores(self):
         """
-        Get the current scores, captured stones, and territories.
-        :return: Dictionary with detailed score information
+        Return a dictionary of the scoreboard fields for debugging or display.
         """
         return {
             "black_score": self.black_score,
@@ -79,12 +79,12 @@ class ScoreBoard:
 
     def __repr__(self):
         """
-        String representation of the scoreboard for debugging.
+        String representation for debugging.
         """
         return (
             f"ScoreBoard("
             f"Black Score: {self.black_score}, Captured by Black: {self.captured_black}, "
-            f"Territories (Black): {self.territories['black']} | "
+            f"Territories(Black): {self.territories['black']} | "
             f"White Score: {self.white_score}, Captured by White: {self.captured_white}, "
-            f"Territories (White): {self.territories['white']})"
+            f"Territories(White): {self.territories['white']})"
         )
