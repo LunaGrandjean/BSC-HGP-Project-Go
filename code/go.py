@@ -12,7 +12,7 @@ Defines the main QMainWindow class (GoGame) for the Go GUI:
 
 from PyQt6.QtWidgets import (
     QMainWindow, QVBoxLayout, QLabel, QGridLayout, QPushButton,
-    QWidget, QMessageBox, QMenuBar, QHBoxLayout
+    QWidget, QMessageBox, QMenuBar, QHBoxLayout, QSizePolicy
 )
 from PyQt6.QtCore import QSize, Qt, QTimer
 from PyQt6.QtGui import QAction, QFont
@@ -61,10 +61,11 @@ class GoGame(QMainWindow):
 
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(0)
-        self.grid_layout.setContentsMargins(50, 50, 50, 50)
+        self.grid_layout.setContentsMargins(10, 10, 10, 10)
         board_widget = QWidget()
         board_widget.setLayout(self.grid_layout)
         board_widget.setStyleSheet("background-color: #B58500; border: 5px solid black;")
+        board_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         main_layout.addWidget(board_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
         button_layout = QHBoxLayout()
@@ -107,11 +108,10 @@ class GoGame(QMainWindow):
 
         self.logic = GameLogic(self.board_size)
 
-        # Create the Board widget from board.py
         self.board_widget = Board(self.board_size)
+        self.board_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.grid_layout.addWidget(self.board_widget, 0, 0, self.board_size, self.board_size)
 
-        # Connect the stonePlaced signal to place_stone
         self.board_widget.stonePlaced.connect(self.place_stone)
 
         self.update_labels()
@@ -170,30 +170,21 @@ class GoGame(QMainWindow):
         self.update_labels()
 
     def place_stone(self, row, col):
-        """
-        Attempt to place a stone in the logic, then animate on the board.
-        """
         captured_positions = self.logic.place_stone(row, col)
         if captured_positions is None:
             QMessageBox.warning(self, "Invalid Move", "This move is not valid.")
             return
 
-        # Who just played is the opposite of the current player after logic flips it
         just_played = self.logic.get_current_player() * -1
 
-        # Save move
         self.move_history.append((row, col, just_played, captured_positions))
         self.redo_stack.clear()
 
-        # Animate any captures on the board
         if captured_positions:
             self.board_widget.animate_capture(captured_positions, -just_played)
 
-        # Also place the stone on the board itself for the "grow" effect
-        # (We do this only if logic says valid)
         self.board_widget.place_stone(row, col, just_played)
 
-        # Switch timer
         if self.current_timer == "black":
             self.white_timer = 120
             self.current_timer = "white"
@@ -238,10 +229,8 @@ class GoGame(QMainWindow):
         self.move_history.append((row, col, player_of_move, recaptured))
         self.logic.current_player = original_player
 
-        # Animate captures again
         if recaptured:
             self.board_widget.animate_capture(recaptured, -player_of_move)
-        # Animate stone placement
         self.board_widget.place_stone(row, col, player_of_move)
 
         self.update_board_ui()
@@ -283,10 +272,8 @@ class GoGame(QMainWindow):
         white_final = final_scores["white"]
         winner = "Black" if black_final > white_final else "White"
 
-        # Animate a winner effect on the board
         self.board_widget.animate_winner(winner)
 
-        # Instead of immediately blocking with a modal, wait ~2.1s
         msg = (
             f"Game Over!\n\n"
             f"Final Scores:\n"
@@ -326,7 +313,6 @@ class GoGame(QMainWindow):
         )
 
     def update_board_ui(self):
-        # Pull the updated board state from logic
         board_state = self.logic.get_board_state()
         for (r, c), val in board_state.items():
             self.board_widget.grid[r][c] = val
