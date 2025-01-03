@@ -9,7 +9,6 @@ Defines the main QMainWindow class (GoGame) for the Go GUI:
 - Resizable window
 - Handicap stones
 """
-
 from PyQt6.QtWidgets import (
     QMainWindow, QVBoxLayout, QLabel, QGridLayout, QPushButton,
     QWidget, QMessageBox, QMenuBar, QHBoxLayout, QSizePolicy
@@ -25,6 +24,20 @@ class GoGame(QMainWindow):
         self.setWindowTitle("Go Game - 7x7 Board")
         self.resize(QSize(800, 900))
 
+        # Stylesheet for buttons only
+        self.setStyleSheet("""
+            QPushButton {
+                background-color: #3333CC; /* Button background */
+                color: #FFFFFF; /* Button text */
+                border-radius: 10px;
+                padding: 10px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #5555FF; /* Button hover effect */
+            }
+        """)
+
         self.black_timer = 120
         self.white_timer = 120
         self.current_timer = None
@@ -39,60 +52,53 @@ class GoGame(QMainWindow):
         main_layout = QVBoxLayout(main_widget)
         main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # Turn Label
         self.turn_label = QLabel("Black's Turn")
         self.turn_label.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        self.turn_label.setStyleSheet("color: black; margin-bottom: 10px;")
+        self.turn_label.setStyleSheet("margin-bottom: 10px;")
         main_layout.addWidget(self.turn_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        # Score Label
         self.score_label = QLabel("Black: 0 | White: 0")
         self.score_label.setFont(QFont("Arial", 14))
-        self.score_label.setStyleSheet("color: gray; margin-bottom: 20px;")
+        self.score_label.setStyleSheet("margin-bottom: 20px;")
         main_layout.addWidget(self.score_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        # Timer Labels
         self.black_timer_label = QLabel("Black Timer: 02:00")
         self.black_timer_label.setFont(QFont("Arial", 14))
-        self.black_timer_label.setStyleSheet("color: black; margin-bottom: 5px;")
+        self.black_timer_label.setStyleSheet("margin-bottom: 5px;")
         main_layout.addWidget(self.black_timer_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.white_timer_label = QLabel("White Timer: 02:00")
         self.white_timer_label.setFont(QFont("Arial", 14))
-        self.white_timer_label.setStyleSheet("color: gray; margin-bottom: 20px;")
+        self.white_timer_label.setStyleSheet("margin-bottom: 20px;")
         main_layout.addWidget(self.white_timer_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        # Board Layout
         self.grid_layout = QGridLayout()
         self.grid_layout.setSpacing(0)
         self.grid_layout.setContentsMargins(10, 10, 10, 10)
         board_widget = QWidget()
+        board_widget.setObjectName("boardWidget")
         board_widget.setLayout(self.grid_layout)
-        board_widget.setStyleSheet("background-color: #B58500; border: 5px solid black;")
         board_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         main_layout.addWidget(board_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        # Control Buttons
         button_layout = QHBoxLayout()
         button_layout.setSpacing(20)
 
         self.pass_button = QPushButton("PASS")
-        self.pass_button.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        self.pass_button.setStyleSheet("background-color: #ffffff; color: red; "
-                                       "border: 2px solid red; border-radius: 10px; padding: 10px;")
         self.pass_button.clicked.connect(self.pass_turn)
 
         self.undo_button = QPushButton("UNDO")
-        self.undo_button.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        self.undo_button.setStyleSheet("background-color: #ffffff; color: blue; "
-                                       "border: 2px solid blue; border-radius: 10px; padding: 10px;")
         self.undo_button.clicked.connect(self.undo_move)
 
         self.redo_button = QPushButton("REDO")
-        self.redo_button.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        self.redo_button.setStyleSheet("background-color: #ffffff; color: purple; "
-                                       "border: 2px solid purple; border-radius: 10px; padding: 10px;")
         self.redo_button.clicked.connect(self.redo_move)
 
         self.reset_button = QPushButton("RESET")
-        self.reset_button.setFont(QFont("Arial", 16, QFont.Weight.Bold))
-        self.reset_button.setStyleSheet("background-color: #ffffff; color: green; "
-                                        "border: 2px solid green; border-radius: 10px; padding: 10px;")
         self.reset_button.clicked.connect(self.reset_game)
 
         button_layout.addWidget(self.pass_button)
@@ -108,6 +114,7 @@ class GoGame(QMainWindow):
 
         self.logic = GameLogic(self.board_size)
 
+        # Board Widget
         self.board_widget = Board(self.board_size)
         self.board_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.grid_layout.addWidget(self.board_widget, 0, 0, self.board_size, self.board_size)
