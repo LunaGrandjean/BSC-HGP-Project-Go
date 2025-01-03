@@ -9,6 +9,7 @@ Defines the main QMainWindow class (GoGame) for the Go GUI:
 - Resizable window
 - Handicap stones
 """
+
 from PyQt6.QtWidgets import (
     QMainWindow, QVBoxLayout, QLabel, QGridLayout, QPushButton,
     QWidget, QMessageBox, QMenuBar, QHBoxLayout, QSizePolicy
@@ -24,19 +25,9 @@ class GoGame(QMainWindow):
         self.setWindowTitle("Go Game - 7x7 Board")
         self.resize(QSize(800, 900))
 
-        # Stylesheet for buttons only
-        self.setStyleSheet("""
-            QPushButton {
-                background-color: #3333CC; /* Button background */
-                color: #FFFFFF; /* Button text */
-                border-radius: 10px;
-                padding: 10px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #5555FF; /* Button hover effect */
-            }
-        """)
+        # Initialize theme
+        self.current_theme = "light"
+        self.apply_theme()
 
         self.black_timer = 120
         self.white_timer = 120
@@ -139,6 +130,56 @@ class GoGame(QMainWindow):
         handicap_3_action = QAction("Handicap 3 Stones", self)
         handicap_3_action.triggered.connect(lambda: self.apply_handicap(3))
         handicap_menu.addAction(handicap_3_action)
+
+        # Theme menu
+        theme_menu = menu_bar.addMenu("Theme")
+        toggle_theme_action = QAction("Day/Night Theme", self)
+        toggle_theme_action.triggered.connect(self.toggle_theme)
+        theme_menu.addAction(toggle_theme_action)
+
+    def apply_theme(self):
+        if self.current_theme == "light":
+            self.setStyleSheet("""
+                QMainWindow {
+                    background-color: #FFFFFF;
+                }
+                QLabel {
+                    color: #000000;
+                }
+                QPushButton {
+                    background-color: #D3D3D3;
+                    color: #000000;
+                    border-radius: 10px;
+                    padding: 10px;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: #B0C4DE;
+                }
+            """)
+        else:
+            self.setStyleSheet("""
+                QMainWindow {
+                    background-color: #2D2D2D;
+                }
+                QLabel {
+                    color: #FFFFFF;
+                }
+                QPushButton {
+                    background-color: #3333CC;
+                    color: #FFFFFF;
+                    border-radius: 10px;
+                    padding: 10px;
+                    font-size: 14px;
+                }
+                QPushButton:hover {
+                    background-color: #5555FF;
+                }
+            """)
+
+    def toggle_theme(self):
+        self.current_theme = "dark" if self.current_theme == "light" else "light"
+        self.apply_theme()
 
     def show_how_to_play(self):
         rules = (
